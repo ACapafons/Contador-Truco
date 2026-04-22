@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Truco Vzla - Log</title>
+    <title>Truco Vzla - Pro</title>
     <style>
         body {
             background-color: #000;
@@ -17,49 +17,27 @@
             padding: 20px 0;
             box-sizing: border-box;
         }
-
-        .tablero {
-            display: flex;
-            width: 100%;
-            justify-content: space-around;
-            margin-top: 20px;
-        }
-
+        .tablero { display: flex; width: 100%; justify-content: space-around; margin-top: 20px; }
         .col { text-align: center; width: 50%; }
         .nombre { font-size: 0.8rem; color: #444; letter-spacing: 2px; }
-        .puntos { font-size: 6rem; font-weight: 200; margin: 10px 0; }
-
+        .puntos { font-size: 6.5rem; font-weight: 200; margin: 10px 0; line-height: 1; }
         .controles { display: flex; justify-content: center; gap: 15px; }
         button {
             background: #111; border: 1px solid #333; color: #fff;
-            width: 55px; height: 55px; border-radius: 50%; font-size: 1.5rem;
+            width: 60px; height: 60px; border-radius: 50%; font-size: 1.5rem;
+            touch-action: manipulation;
         }
-
-        /* ESTILO DEL HISTORIAL */
+        button:active { background: #333; transform: scale(0.9); }
         .log-container {
-            width: 80%;
-            margin-top: 30px;
-            border-top: 1px solid #222;
-            padding-top: 15px;
-            flex-grow: 1;
-            overflow-y: auto; /* Para que puedas hacer scroll si hay muchos puntos */
-            text-align: center;
+            width: 85%; margin-top: 30px; border-top: 1px solid #222;
+            padding-top: 15px; flex-grow: 1; overflow-y: auto; text-align: center;
         }
-
-        .log-titulo { font-size: 0.7rem; color: #444; margin-bottom: 10px; }
-        
-        .log-entrada {
-            font-size: 0.8rem;
-            color: #888;
-            margin-bottom: 5px;
-            animation: fadeIn 0.3s ease;
-        }
-
+        .log-titulo { font-size: 0.7rem; color: #444; margin-bottom: 10px; text-transform: uppercase; }
+        .log-entrada { font-size: 0.8rem; color: #666; margin-bottom: 5px; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         .btn-reset {
             background: none; border: none; color: #333;
-            font-size: 0.7rem; margin-top: 10px; text-decoration: underline;
+            font-size: 0.7rem; margin-top: 15px; text-decoration: underline;
         }
     </style>
 </head>
@@ -86,14 +64,22 @@
     </div>
 
     <div class="log-container">
-        <div class="log-titulo">HISTORIAL DE JUGADAS</div>
+        <div class="log-titulo">Historial de jugadas</div>
         <div id="lista-log"></div>
     </div>
 
     <button class="btn-reset" onclick="resetear()">Reiniciar Partida</button>
 
     <script>
-        let n = 0, e = 0;
+        // Cargar datos al abrir la web
+        let n = parseInt(localStorage.getItem('nos')) || 0;
+        let e = parseInt(localStorage.getItem('ell')) || 0;
+
+        window.onload = () => {
+            document.getElementById('puntos-nos').innerText = n;
+            document.getElementById('puntos-ell').innerText = e;
+            document.getElementById('lista-log').innerHTML = localStorage.getItem('log') || "";
+        };
 
         function sumar(equipo, valor) {
             let textoLog = "";
@@ -112,27 +98,32 @@
             }
             
             agregarLog(textoLog);
+            guardar();
         }
 
         function agregarLog(mensaje) {
             const lista = document.getElementById('lista-log');
-            const nuevaEntrada = document.createElement('div');
-            nuevaEntrada.className = 'log-entrada';
-            nuevaEntrada.innerText = mensaje;
-            
-            // Ponemos la jugada más nueva al principio de la lista
-            lista.prepend(nuevaEntrada);
+            const div = document.createElement('div');
+            div.className = 'log-entrada';
+            div.innerText = mensaje;
+            lista.prepend(div);
+        }
+
+        function guardar() {
+            localStorage.setItem('nos', n);
+            localStorage.setItem('ell', e);
+            localStorage.setItem('log', document.getElementById('lista-log').innerHTML);
         }
 
         function check(p, m) { if(p >= 24) { alert(m); resetear(); } }
 
         function resetear() {
-            n=0; e=0;
-            document.getElementById('puntos-nos').innerText=0;
-            document.getElementById('puntos-ell').innerText=0;
-            document.getElementById('lista-log').innerHTML = ""; // Limpia el historial
+            if(confirm("¿Reiniciar la partida?")) {
+                n=0; e=0;
+                localStorage.clear();
+                location.reload();
+            }
         }
     </script>
-
 </body>
 </html>
