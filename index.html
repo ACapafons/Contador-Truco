@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Truco Vzla - Log</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: -apple-system, system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            box-sizing: border-box;
+        }
+
+        .tablero {
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .col { text-align: center; width: 50%; }
+        .nombre { font-size: 0.8rem; color: #444; letter-spacing: 2px; }
+        .puntos { font-size: 6rem; font-weight: 200; margin: 10px 0; }
+
+        .controles { display: flex; justify-content: center; gap: 15px; }
+        button {
+            background: #111; border: 1px solid #333; color: #fff;
+            width: 55px; height: 55px; border-radius: 50%; font-size: 1.5rem;
+        }
+
+        /* ESTILO DEL HISTORIAL */
+        .log-container {
+            width: 80%;
+            margin-top: 30px;
+            border-top: 1px solid #222;
+            padding-top: 15px;
+            flex-grow: 1;
+            overflow-y: auto; /* Para que puedas hacer scroll si hay muchos puntos */
+            text-align: center;
+        }
+
+        .log-titulo { font-size: 0.7rem; color: #444; margin-bottom: 10px; }
+        
+        .log-entrada {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 5px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .btn-reset {
+            background: none; border: none; color: #333;
+            font-size: 0.7rem; margin-top: 10px; text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tablero">
+        <div class="col">
+            <span class="nombre">NOSOTROS</span>
+            <p id="puntos-nos" class="puntos">0</p>
+            <div class="controles">
+                <button onclick="sumar('nos', -1)">-</button>
+                <button onclick="sumar('nos', 1)">+</button>
+            </div>
+        </div>
+
+        <div class="col">
+            <span class="nombre">ELLOS</span>
+            <p id="puntos-ell" class="puntos">0</p>
+            <div class="controles">
+                <button onclick="sumar('ell', -1)">-</button>
+                <button onclick="sumar('ell', 1)">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="log-container">
+        <div class="log-titulo">HISTORIAL DE JUGADAS</div>
+        <div id="lista-log"></div>
+    </div>
+
+    <button class="btn-reset" onclick="resetear()">Reiniciar Partida</button>
+
+    <script>
+        let n = 0, e = 0;
+
+        function sumar(equipo, valor) {
+            let textoLog = "";
+            let signo = valor > 0 ? "+" : "";
+
+            if(equipo === 'nos') {
+                n = Math.max(0, n + valor);
+                document.getElementById('puntos-nos').innerText = n;
+                textoLog = `NOSOTROS: ${signo}${valor} (Total: ${n})`;
+                check(n, "¡NOSOTROS GANAMOS!");
+            } else {
+                e = Math.max(0, e + valor);
+                document.getElementById('puntos-ell').innerText = e;
+                textoLog = `ELLOS: ${signo}${valor} (Total: ${e})`;
+                check(e, "¡ELLOS GANAN!");
+            }
+            
+            agregarLog(textoLog);
+        }
+
+        function agregarLog(mensaje) {
+            const lista = document.getElementById('lista-log');
+            const nuevaEntrada = document.createElement('div');
+            nuevaEntrada.className = 'log-entrada';
+            nuevaEntrada.innerText = mensaje;
+            
+            // Ponemos la jugada más nueva al principio de la lista
+            lista.prepend(nuevaEntrada);
+        }
+
+        function check(p, m) { if(p >= 24) { alert(m); resetear(); } }
+
+        function resetear() {
+            n=0; e=0;
+            document.getElementById('puntos-nos').innerText=0;
+            document.getElementById('puntos-ell').innerText=0;
+            document.getElementById('lista-log').innerHTML = ""; // Limpia el historial
+        }
+    </script>
+
+</body>
+</html>
