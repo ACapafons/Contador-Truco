@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Truco Vzla - Pro</title>
     <style>
+        /* Configuración visual general */
         body {
-            background-color: #000;
+            background-color: #000; /* Fondo negro para ahorro de batería */
             color: #fff;
             font-family: -apple-system, system-ui, sans-serif;
             display: flex;
@@ -17,27 +18,85 @@
             padding: 20px 0;
             box-sizing: border-box;
         }
-        .tablero { display: flex; width: 100%; justify-content: space-around; margin-top: 20px; }
+
+        /* Contenedor de las columnas de puntuación */
+        .tablero { 
+            display: flex; 
+            width: 100%; 
+            justify-content: space-around; 
+            margin-top: 20px; 
+        }
+
         .col { text-align: center; width: 50%; }
-        .nombre { font-size: 0.8rem; color: #444; letter-spacing: 2px; }
-        .puntos { font-size: 6.5rem; font-weight: 200; margin: 10px 0; line-height: 1; }
+
+        .nombre { 
+            font-size: 0.8rem; 
+            color: #444; 
+            letter-spacing: 2px; 
+            text-transform: uppercase;
+        }
+
+        /* Estilo de los números de puntuación */
+        .puntos { 
+            font-size: 6.5rem; 
+            font-weight: 200; 
+            margin: 10px 0; 
+            line-height: 1; 
+        }
+
         .controles { display: flex; justify-content: center; gap: 15px; }
+
+        /* Estilo de los botones circulares */
         button {
-            background: #111; border: 1px solid #333; color: #fff;
-            width: 60px; height: 60px; border-radius: 50%; font-size: 1.5rem;
-            touch-action: manipulation;
+            background: #111; 
+            border: 1px solid #333; 
+            color: #fff;
+            width: 60px; 
+            height: 60px; 
+            border-radius: 50%; 
+            font-size: 1.5rem;
+            touch-action: manipulation; /* Optimiza la respuesta al toque */
+            cursor: pointer;
         }
+
         button:active { background: #333; transform: scale(0.9); }
+
+        /* Contenedor del historial de jugadas */
         .log-container {
-            width: 85%; margin-top: 30px; border-top: 1px solid #222;
-            padding-top: 15px; flex-grow: 1; overflow-y: auto; text-align: center;
+            width: 85%; 
+            margin-top: 30px; 
+            border-top: 1px solid #222;
+            padding-top: 15px; 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            text-align: center;
         }
-        .log-titulo { font-size: 0.7rem; color: #444; margin-bottom: 10px; text-transform: uppercase; }
-        .log-entrada { font-size: 0.8rem; color: #666; margin-bottom: 5px; animation: fadeIn 0.3s ease; }
+
+        .log-titulo { 
+            font-size: 0.7rem; 
+            color: #444; 
+            margin-bottom: 10px; 
+            text-transform: uppercase; 
+        }
+
+        .log-entrada { 
+            font-size: 0.8rem; 
+            color: #666; 
+            margin-bottom: 5px; 
+            animation: fadeIn 0.3s ease; 
+        }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Botón de reinicio */
         .btn-reset {
-            background: none; border: none; color: #333;
-            font-size: 0.7rem; margin-top: 15px; text-decoration: underline;
+            background: none; 
+            border: none; 
+            color: #333;
+            font-size: 0.7rem; 
+            margin-top: 15px; 
+            text-decoration: underline;
+            white-space: nowrap; /* Evita que el texto salte de línea */
         }
     </style>
 </head>
@@ -68,25 +127,27 @@
         <div id="lista-log"></div>
     </div>
 
-    <button class="btn-reset" onclick="resetear()">Reiniciar</button>
+    <button class="btn-reset" onclick="resetear()">Reiniciar Partida</button>
 
     <script>
-        // Cargar datos al abrir la web
+        // Cargamos los puntos guardados de la sesión anterior o iniciamos en 0
         let n = parseInt(localStorage.getItem('nos')) || 0;
         let e = parseInt(localStorage.getItem('ell')) || 0;
 
+        // Al cargar la página, inyectamos los datos guardados en la interfaz
         window.onload = () => {
             document.getElementById('puntos-nos').innerText = n;
             document.getElementById('puntos-ell').innerText = e;
             document.getElementById('lista-log').innerHTML = localStorage.getItem('log') || "";
         };
 
+        // Función principal para modificar la puntuación
         function sumar(equipo, valor) {
             let textoLog = "";
             let signo = valor > 0 ? "+" : "";
 
             if(equipo === 'nos') {
-                n = Math.max(0, n + valor);
+                n = Math.max(0, n + valor); // Evita que los puntos sean negativos
                 document.getElementById('puntos-nos').innerText = n;
                 textoLog = `NOSOTROS: ${signo}${valor} (Total: ${n})`;
                 check(n, "¡NOSOTROS GANAMOS!");
@@ -98,9 +159,10 @@
             }
             
             agregarLog(textoLog);
-            guardar();
+            guardar(); // Guardamos el estado actual tras cada cambio
         }
 
+        // Añade una nueva línea al historial visual (la más reciente arriba)
         function agregarLog(mensaje) {
             const lista = document.getElementById('lista-log');
             const div = document.createElement('div');
@@ -109,19 +171,40 @@
             lista.prepend(div);
         }
 
+        // Guarda las variables y el HTML del historial en la memoria local
         function guardar() {
             localStorage.setItem('nos', n);
             localStorage.setItem('ell', e);
             localStorage.setItem('log', document.getElementById('lista-log').innerHTML);
         }
 
-        function check(p, m) { if(p >= 24) { alert(m); resetear(); } }
+        // Comprueba si se ha alcanzado el límite de 24 puntos
+        function check(p, m) { 
+            if(p >= 24) { 
+                // Pequeño retardo para permitir que el número 24 se pinte en pantalla antes del aviso
+                setTimeout(() => {
+                    alert(m); 
+                    resetear(true); // Reinicio forzado para limpiar todo automáticamente
+                }, 100);
+            } 
+        }
 
-        function resetear() {
-            if(confirm("¿Reiniciar la partida?")) {
-                n=0; e=0;
+        /**
+         * Limpia la partida.
+         * @param {boolean} forzado - Si es true, no pide confirmación al usuario (útil al ganar).
+         */
+        function resetear(forzado = false) {
+            if(forzado || confirm("¿Seguro que quieres reiniciar la partida?")) {
+                n = 0; 
+                e = 0;
+                
+                // Borramos definitivamente los datos del almacenamiento local
                 localStorage.clear();
-                location.reload();
+                
+                // Actualizamos la interfaz visual a cero
+                document.getElementById('puntos-nos').innerText = 0;
+                document.getElementById('puntos-ell').innerText = 0;
+                document.getElementById('lista-log').innerHTML = "";
             }
         }
     </script>
